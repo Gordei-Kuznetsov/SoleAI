@@ -7,7 +7,8 @@ namespace SoleAI
         public Network(int numOfInputs, LayerDenseStruct[] layersToAdd)
         {
             Layers = new LayerDense[layersToAdd.Length];
-
+            
+            // initializing the first Layer outside the loop as it is does not have a preceding layer to get the inputSize value from
             Layers[0] = new LayerDense((layersToAdd[0].size, numOfInputs), layersToAdd[0].activation);
 
             for (int i = 1; i < layersToAdd.Length; i++)
@@ -33,28 +34,34 @@ namespace SoleAI
             }
 
             Console.WriteLine($"Training started.\nBatch size: {batchSize}; Epochs: {epochs}.\n");
-            for(int e = 0; e < epochs; e++)
+
+            // declaring the arrays for reuse in the nested loop
+            float[,] inputs = new float[batchSize, inputSize];
+            int[] correctOutput = new int[batchSize];
+
+            for (int e = 0; e < epochs; e++)
             {
                 DateTime start = DateTime.Now;
                 Console.WriteLine($"Epoch #{e} started.");
 
+                // iterating through the inputs with batch-sized hops to use the iterable as index for getting the right section of inputs from the array
+                // and avoiding getting out of range by substracting the a batch from the iterating range
                 for (int b = 0; b <= numOfBatches - batchSize; b += batchSize)
                 {
-                    float[,] inputs = new float[batchSize, inputSize];
                     Array.Copy(inputData, b, inputs, 0, batchSize);
 
                     for (int l = 0; l < Layers.Length; l++)
                     {
+                        // outputs of the processing become the inputs for next batch
                         inputs = Layers[l].Forward(inputs, batchSize);
                     }
-
-                    int[] correctOutput = new int[batchSize];
+                    
                     Array.Copy(expectedOutputs, b, correctOutput, 0, batchSize);
 
+                    // using the inputs array as it stores outputs from the processing (prdictions) of the last (output) layer
                     float loss = Loss(inputs, correctOutput);
 
-                    string consoleOutput = $"\tBatch completed: Average loss: {loss}";
-                    Console.WriteLine(consoleOutput);
+                    Console.WriteLine($"\tBatch completed: Average loss: {loss}");
 
                     //BackPropogate()
                     //Maybe some logging
@@ -71,14 +78,16 @@ namespace SoleAI
             float negLogProbabilities = 0;
             for (int i = 0; i < correctClasses.Length; i++)
             {
+                // the prediction that is supposed to be correct
                 float targetClass = predictions[i, correctClasses[i]];
                 
-                // clipping the values to between almost 0 and almost 1 to avoid inf results
+                // clipping the values to between almost 0 and almost 1 to avoid infinite log result
                 if (targetClass < 1e-7f) { targetClass = 1e-7f; }
                 else if (targetClass > 1 - 1e-7f) { targetClass = 1 - 1e-7f; }
 
                 negLogProbabilities += -1 * (float)Math.Log(targetClass);
             }
+            // getting mean probability/loss/accuracy
             return negLogProbabilities / correctClasses.Length;
         }
 

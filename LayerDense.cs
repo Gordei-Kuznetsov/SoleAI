@@ -17,22 +17,15 @@ namespace SoleAI
             {
                 for (int w = 0; w < shape.Item2; w++)
                 {
+                    // might need to use a different initialization of the weights
                     int sign = rand.Next(-1, 1) == -1 ? -1 : 1;
                     float weight = (float)rand.NextDouble() * sign;
                     weights[n, w] = weight;
                 }
             }
 
-            //Don't know why I even did the normilization of already normalized values
-            //weights = Network.Normalize(weights, shape, max, min);
-
-
             biases = new float[shape.Item1];
             Array.Fill(biases, 0f);
-            //for (int i = 0; i < shape.Item1; i++)
-            //{
-            //    biases[i] = rand.Next(-3, 3);
-            //}
         }
 
         public readonly (int, int) shape;

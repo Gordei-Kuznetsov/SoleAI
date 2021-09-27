@@ -4,6 +4,10 @@ namespace SoleAI
 {
     public class Activation
     {
+        // Need to restructure the system around passing the activation function to the layer
+        // ReLU can be executed for each output in the DenseLayer.Forward method
+        // instead of running another set of nested loops
+        // should be a huge time saver as it is going to be used on most of the layers in the nn
         public static float[,] ReLU(float[,] outputs, (int, int) shape)
         {
             for (int a = 0; a < shape.Item1; a++)
@@ -39,8 +43,17 @@ namespace SoleAI
                 }
             }
 
+            // this could be the Process method being called with a parameter for the function to do the ```values[n, w] / normBases[n]```
+            // something like:
+            // Process(Func<float, float, float> activation)
+            // {
+            //      ...
+            //      values[n,w] = activation.Invoke(values[n,w], normBases[n]);
+            //      ...
+            // }
             for (int n = 0; n < shape.Item1; n++)
             {
+                // this inner loop can go to after the second inner loop in the previous section
                 for (int w = 0; w < shape.Item2; w++)
                 {
                     values[n, w] = values[n, w] / normBases[n];
