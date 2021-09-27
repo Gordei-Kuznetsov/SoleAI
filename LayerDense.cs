@@ -1,21 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SoleAI
 {
     public class LayerDense
     {
-        public LayerDense((int, int) shape, int batchSize, Func<float[,], (int, int), float[,]> activation)
+        public LayerDense((int, int) shape, Func<float[,], (int, int), float[,]> activation)
         {
             this.shape = shape;
-            this.batchSize = batchSize;
             this.activation = activation;
 
             Random rand = new Random();
-
-            float min = 1;
-            float max = -1;
 
             weights = new float[shape.Item1, shape.Item2];
 
@@ -23,35 +17,43 @@ namespace SoleAI
             {
                 for (int w = 0; w < shape.Item2; w++)
                 {
-                    int sign = rand.Next(0, 1) == 0 ? -1 : 1;
+                    int sign = rand.Next(-1, 1) == -1 ? -1 : 1;
                     float weight = (float)rand.NextDouble() * sign;
                     weights[n, w] = weight;
-                    if (weight < min) { min = weight; }
-                    if (weight > max) { max = weight; }
                 }
             }
 
-            weights = Network.Normalize(weights, shape, max, min);
+            //Don't know why I even did the normilization of already normalized values
+            //weights = Network.Normalize(weights, shape, max, min);
 
 
             biases = new float[shape.Item1];
-
-            for (int i = 0; i < shape.Item1; i++)
-            {
-                biases[i] = rand.Next(-3, 3);
-            }
+            Array.Fill(biases, 0f);
+            //for (int i = 0; i < shape.Item1; i++)
+            //{
+            //    biases[i] = rand.Next(-3, 3);
+            //}
         }
 
         public readonly (int, int) shape;
-        private readonly int batchSize;
-        private float[,] weights;
-        private float[] biases;
+        private readonly float[,] weights;
+        private readonly float[] biases;
         private float[,] outputs;
         private readonly Func<float[,], (int, int), float[,]> activation;
 
-        public float[,] Forward(float[,] inputBatch)
+        public float[,] Forward(float[,] inputBatch, int batchSize)
         {
             outputs = new float[batchSize, shape.Item1];
+
+            Process(inputBatch, batchSize);
+
+            outputs = activation.Invoke(outputs, (batchSize, shape.Item1));
+
+            return outputs;
+        }
+
+        private void Process(float[,] inputBatch, int batchSize)
+        {
             for (int b = 0; b < batchSize; b++)
             {
                 for (int n = 0; n < shape.Item1; n++)
@@ -64,10 +66,6 @@ namespace SoleAI
                     outputs[b, n] = dot + biases[n];
                 }
             }
-
-            outputs = activation.Invoke(outputs, (batchSize, shape.Item1));
-
-            return outputs;
         }
     }
 }

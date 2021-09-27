@@ -8,11 +8,12 @@ namespace SoleAI
         {
             float[,] inputs = new float[,]
             {
-                { 1f, 2f, 3f, 2.5f },
+                { 1.0f, 2.0f, 3.0f, 2.5f },
                 { 2.0f, 5.0f, -1.0f, 2.0f },
                 { -1.5f, 2.7f, 3.3f, -0.8f },
                 { 3.2f, -1.0f, 0.1f, -2.2f },
-                {-1.5f, -0.9f, 0.1f, 3.2f }
+                { -1.5f, -0.9f, 0.1f, 3.2f },
+                { 0.91f, -1.98f, 2.9f, -1.43f }
             };
 
             (int, int) inputsShape = (5, 4);
@@ -31,12 +32,15 @@ namespace SoleAI
 
             inputs = Network.Normalize(inputs, inputsShape, max, min);
 
-            Network network = new Network(2);
+            int[] expectedPredictedClasses = new int[] { 1, 0, 0, 2, 1, 2 };
 
-            network.AddLayer((6, 4), Activation.ReLU);
-            network.AddLayer((3, 6), Activation.ReLU);
+            Network network = new Network(inputs.GetLength(1), new LayerDenseStruct[] { 
+                new LayerDenseStruct(6, Activation.ReLU),
+                new LayerDenseStruct(6, Activation.ReLU),
+                new LayerDenseStruct(3, Activation.SoftMax)
+            });
 
-            network.Train(inputs);
+            network.Train(inputs, expectedPredictedClasses, 2, 3);
 
             Console.ReadLine();
         }

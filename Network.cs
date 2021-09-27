@@ -1,50 +1,85 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace SoleAI
 {
     public class Network
     {
-        public Network(int batchSize)
+        public Network(int numOfInputs, LayerDenseStruct[] layersToAdd)
         {
-            Layers = new List<LayerDense>();
-            this.batchSize = batchSize;
+            Layers = new LayerDense[layersToAdd.Length];
+
+            Layers[0] = new LayerDense((layersToAdd[0].size, numOfInputs), layersToAdd[0].activation);
+
+            for (int i = 1; i < layersToAdd.Length; i++)
+            {
+                Layers[i] = new LayerDense((layersToAdd[i].size, layersToAdd[i - 1].size), layersToAdd[i].activation);
+            }
         }
 
-        private readonly List<LayerDense> Layers;
-        private readonly int batchSize;
+        private readonly LayerDense[] Layers;
 
-        public void AddLayer((int, int) shape, Func<float[,], (int, int), float[,]> activation)
+        public void Train(float[,] inputData, int[] expectedOutputs, int batchSize, int epochs)
         {
-            if(Layers.Count > 0 && shape.Item2 != Layers[Layers.Count - 1].shape.Item1)
+            int numOfBatches = inputData.GetLength(0);
+            if (numOfBatches != expectedOutputs.Length)
             {
-                throw new ArgumentException("Number of inputs for the layer to be added does not match the size of the last layer.");
+                throw new ArgumentException("Number of the provided expected outputs does not match the number of inputs sets.");
             }
 
-            Layers.Add(new LayerDense(shape, batchSize, activation));
-        }
-
-        public void Train(float[,] inputs)
-        {
-            int lengthsOfBatches = inputs.GetLength(1);
-            if (Layers[0].shape.Item2 != lengthsOfBatches)
+            int inputSize = inputData.GetLength(1);
+            if (Layers[0].shape.Item2 != inputSize)
             {
                 throw new ArgumentException("Number of input values int the inputs does not match the number of weights in the first layer.");
             }
 
-            int numOfBatches = inputs.GetLength(0);
-            for(int i = 0; i <= numOfBatches - batchSize; i += batchSize)
+            Console.WriteLine($"Training started.\nBatch size: {batchSize}; Epochs: {epochs}.\n");
+            for(int e = 0; e < epochs; e++)
             {
-                float[,] nextBatch = new float[batchSize, lengthsOfBatches];
-                Array.Copy(inputs, i, nextBatch, 0, batchSize);
+                DateTime start = DateTime.Now;
+                Console.WriteLine($"Epoch #{e} started.");
 
-                for (int l = 0; l < Layers.Count; l++)
+                for (int b = 0; b <= numOfBatches - batchSize; b += batchSize)
                 {
-                    nextBatch = Layers[l].Forward(nextBatch);
+                    float[,] inputs = new float[batchSize, inputSize];
+                    Array.Copy(inputData, b, inputs, 0, batchSize);
+
+                    for (int l = 0; l < Layers.Length; l++)
+                    {
+                        inputs = Layers[l].Forward(inputs, batchSize);
+                    }
+
+                    int[] correctOutput = new int[batchSize];
+                    Array.Copy(expectedOutputs, b, correctOutput, 0, batchSize);
+
+                    float loss = Loss(inputs, correctOutput);
+
+                    string consoleOutput = $"\tBatch completed: Average loss: {loss}";
+                    Console.WriteLine(consoleOutput);
+
+                    //BackPropogate()
+                    //Maybe some logging
                 }
 
-                //BackPropogate()
+                TimeSpan duration = DateTime.Now - start;
+                Console.WriteLine($"Epoch finished in {duration.TotalMilliseconds} ms.\n");
             }
+            Console.WriteLine("Training finished.");
+        }
+
+        private float Loss(float[,] predictions, int[] correctClasses)
+        {
+            float negLogProbabilities = 0;
+            for (int i = 0; i < correctClasses.Length; i++)
+            {
+                float targetClass = predictions[i, correctClasses[i]];
+                
+                // clipping the values to between almost 0 and almost 1 to avoid inf results
+                if (targetClass < 1e-7f) { targetClass = 1e-7f; }
+                else if (targetClass > 1 - 1e-7f) { targetClass = 1 - 1e-7f; }
+
+                negLogProbabilities += -1 * (float)Math.Log(targetClass);
+            }
+            return negLogProbabilities / correctClasses.Length;
         }
 
         public static float[,] Normalize(float[,] values, (int, int) shape, float max, float min)
@@ -54,7 +89,7 @@ namespace SoleAI
                 throw new ArgumentException("min is greater than or equal to max.");
             }
 
-            float divider = (max - min) / 2;
+            float divider = 2 / (max - min);
 
             for (int a = 0; a < shape.Item1; a++)
             {
