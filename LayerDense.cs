@@ -4,7 +4,7 @@ namespace SoleAI
 {
     public class LayerDense
     {
-        public LayerDense((int, int) shape, Func<float[,], (int, int), float[,]> activation)
+        public LayerDense((int, int) shape, IActivation activation)
         {
             this.shape = shape;
             this.activation = activation;
@@ -17,8 +17,7 @@ namespace SoleAI
             {
                 for (int w = 0; w < shape.Item2; w++)
                 {
-                    // might need to use a different initialization of the weights
-                    int sign = rand.Next(-1, 1) == -1 ? -1 : 1;
+                    int sign = rand.NextDouble() > 0.5 ? 1 : -1;
                     float weight = (float)rand.NextDouble() * sign;
                     weights[n, w] = weight;
                 }
@@ -32,7 +31,7 @@ namespace SoleAI
         private readonly float[,] weights;
         private readonly float[] biases;
         private float[,] outputs;
-        private readonly Func<float[,], (int, int), float[,]> activation;
+        private readonly IActivation activation;
 
         public float[,] Forward(float[,] inputBatch, int batchSize)
         {
@@ -40,7 +39,7 @@ namespace SoleAI
 
             Process(inputBatch, batchSize);
 
-            outputs = activation.Invoke(outputs, (batchSize, shape.Item1));
+            activation.Forward(outputs, (batchSize, shape.Item1));
 
             return outputs;
         }

@@ -48,7 +48,8 @@ namespace SoleAI
                 // and avoiding getting out of range by substracting the a batch from the iterating range
                 for (int b = 0; b <= numOfBatches - batchSize; b += batchSize)
                 {
-                    Array.Copy(inputData, b, inputs, 0, batchSize);
+                    // getting next batch of input
+                    Copy(inputData, b, inputs, batchSize);
 
                     for (int l = 0; l < Layers.Length; l++)
                     {
@@ -56,6 +57,7 @@ namespace SoleAI
                         inputs = Layers[l].Forward(inputs, batchSize);
                     }
                     
+                    // getting next batch of expected output
                     Array.Copy(expectedOutputs, b, correctOutput, 0, batchSize);
 
                     // using the inputs array as it stores outputs from the processing (prdictions) of the last (output) layer
@@ -91,6 +93,18 @@ namespace SoleAI
             return negLogProbabilities / correctClasses.Length;
         }
 
+        private void Copy(float[,] source, int sourceIndx, float[,] dest, int len)
+        {
+            int sourceShape = source.GetLength(1);
+            for (int a = sourceIndx; a < sourceIndx + len; a++)
+            {
+                for (int b = 0; b < sourceShape; b++)
+                {
+                    dest[a - sourceIndx, b] = source[a, b];
+                }
+            }
+        }
+
         public static float[,] Normalize(float[,] values, (int, int) shape, float max, float min)
         {
             if(min >= max)
@@ -98,13 +112,16 @@ namespace SoleAI
                 throw new ArgumentException("min is greater than or equal to max.");
             }
 
-            float divider = 2 / (max - min);
+            // x" = 2 * (x - min) / (max - min) - 1
+            // x" = x * (2 / (max - min)) - (min * (2 / (max - min)) + 1)
+            float K = 2 / (max - min);
+            float S = min * K + 1;
 
             for (int a = 0; a < shape.Item1; a++)
             {
                 for(int b = 0; b < shape.Item2; b++)
                 {
-                    values[a,b] = (values[a, b] - min) / divider - 1;
+                    values[a, b] = K * values[a, b] - S;
                 }
             }
 

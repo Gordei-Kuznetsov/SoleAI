@@ -2,13 +2,14 @@
 
 namespace SoleAI
 {
-    public class Activation
+    public interface IActivation
     {
-        // Need to restructure the system around passing the activation function to the layer
-        // ReLU can be executed for each output in the DenseLayer.Forward method
-        // instead of running another set of nested loops
-        // should be a huge time saver as it is going to be used on most of the layers in the nn
-        public static float[,] ReLU(float[,] outputs, (int, int) shape)
+        void Forward(float[,] outputs, (int, int) shape);
+    }
+
+    public class ReLU : IActivation
+    {
+        public void Forward(float[,] outputs, (int, int) shape)
         {
             for (int a = 0; a < shape.Item1; a++)
             {
@@ -20,47 +21,41 @@ namespace SoleAI
                     }
                 }
             }
-
-            return outputs;
         }
+    }
 
-        public static float[,] SoftMax(float[,] values, (int, int) shape)
+    public class SoftMax : IActivation
+    {
+        public void Forward(float[,] outputs, (int, int) shape)
         {
-            float[] normBases = new float[shape.Item1];
-            Array.Fill(normBases, 0f);
-            for (int n = 0; n < shape.Item1; n++)
+            for (int b = 0; b < shape.Item1; b++)
             {
+                // getting max output for each set of outputs
+
                 float max = 0f;
-                for (int w = 0; w < shape.Item2; w++)
+                for (int n = 0; n < shape.Item2; n++)
                 {
-                    if(values[n, w] > max) { max = values[n, w]; }
+                    if (outputs[b, n] > max) { max = outputs[b, n]; }
                 }
 
-                for (int w = 0; w < shape.Item2; w++)
-                {
-                    values[n, w] = (float)Math.Pow(Math.E, values[n, w] - max);
-                    normBases[n] += values[n, w];
-                }
-            }
+                // getting exponent of the outputs and preparing the normalization base
 
-            // this could be the Process method being called with a parameter for the function to do the ```values[n, w] / normBases[n]```
-            // something like:
-            // Process(Func<float, float, float> activation)
-            // {
-            //      ...
-            //      values[n,w] = activation.Invoke(values[n,w], normBases[n]);
-            //      ...
-            // }
-            for (int n = 0; n < shape.Item1; n++)
-            {
-                // this inner loop can go to after the second inner loop in the previous section
-                for (int w = 0; w < shape.Item2; w++)
+                float normBase = 0;
+                for (int n = 0; n < shape.Item2; n++)
                 {
-                    values[n, w] = values[n, w] / normBases[n];
+                    // substracting the max value to reduce the output value in case it is huge,
+                    // which could cause overflow when gettting the exponential
+                    outputs[b, n] = (float)Math.Pow(Math.E, outputs[b, n] - max);
+                    normBase += outputs[b, n];
+                }
+
+                // normalizing the exponentiated output
+
+                for (int n = 0; n < shape.Item2; n++)
+                {
+                    outputs[b, n] = outputs[b, n] / normBase;
                 }
             }
-
-            return values;
         }
     }
 }

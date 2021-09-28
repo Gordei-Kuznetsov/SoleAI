@@ -4,12 +4,12 @@ namespace SoleAI
 {
     public struct LayerDenseStruct
     {
-        public LayerDenseStruct(int size, Func<float[,], (int, int), float[,]> activation)
+        public LayerDenseStruct(int size, IActivation activation)
         {
             this.size = size;
             this.activation = activation;
         }
         public int size;
-        public Func<float[,], (int, int), float[,]> activation;
+        public IActivation activation;
     }
 }
