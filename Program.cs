@@ -9,6 +9,8 @@ namespace SoleAI
         static void Main(string[] args)
         {
             App.Run();
+
+            //BenchmarkRunner.Run<Demo>();
         }
     }
 }
