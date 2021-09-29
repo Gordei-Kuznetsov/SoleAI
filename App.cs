@@ -18,15 +18,23 @@ namespace SoleAI
 
             Network.MinMaxNormalize(inputs, -1, 1);
 
-            int[] expectedPredictedClasses = new int[] { 1, 0, 0, 2, 1, 2 };
+            float[][] expectedPredictedClasses = new float[][]
+            {
+                new float[] { 1 },
+                new float[] { 0 },
+                new float[] { 0 },
+                new float[] { 1 },
+                new float[] { 1 },
+                new float[] { 0 }
+            };
 
             Network network = new Network(inputs[0].Length, new LayerDenseStruct[] {
-                new LayerDenseStruct(6, new ReLU()),
-                new LayerDenseStruct(6, new ReLU()),
-                new LayerDenseStruct(3, new SoftMax())
+                new LayerDenseStruct(6, new Tanh()),
+                new LayerDenseStruct(6, new Tanh()),
+                new LayerDenseStruct(1, new Sigmoid())
             });
 
-            network.Train(inputs, expectedPredictedClasses, 2, 3);
+            network.Train(inputs, expectedPredictedClasses, new MSELoss(), 2, 3);
 
             Console.ReadLine();
         }

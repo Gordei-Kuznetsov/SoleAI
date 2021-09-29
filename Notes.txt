@@ -1,6 +1,7 @@
 ﻿GENERAL
 
 1. Use appropriate weights initialization methods depending on the activation function for the layer
+2. Add methods of formating input data
 
 OPTIMIZATION
 
@@ -8,5 +9,3 @@ OPTIMIZATION
 
 TESTING
 
-1. Test situations when there is only one input to the network
-2. Test situation when there is only one output from the network

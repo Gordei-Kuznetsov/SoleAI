@@ -19,7 +19,7 @@ namespace SoleAI
 
         private readonly LayerDense[] Layers;
 
-        public void Train(float[][] inputData, int[] expectedOutputs, int batchSize, int epochs)
+        public void Train(float[][] inputData, float[][] expectedOutputs, ILoss lossFunc, int batchSize, int epochs)
         {
             int numOfBatches = inputData.Length;
             if (numOfBatches != expectedOutputs.Length)
@@ -54,10 +54,10 @@ namespace SoleAI
                     }
 
                     // getting next batch of expected output
-                    int[] correctOutputs = expectedOutputs[b..(b + batchSize)];
+                    float[][] correctOutputs = expectedOutputs[b..(b + batchSize)];
 
                     // using the inputs array as it stores outputs from the processing (prdictions) of the last (output) layer
-                    float loss = Loss(inputs, correctOutputs);
+                    float loss = lossFunc.Calc(inputs, correctOutputs);
 
                     Console.WriteLine($"\tBatch completed: Average loss: {loss}");
 
@@ -71,24 +71,6 @@ namespace SoleAI
             Console.WriteLine("Training finished.\n");
         }
 
-        private float Loss(float[][] predictions, int[] correctClasses)
-        {
-            float negLogProbabilities = 0;
-            for (int i = 0; i < correctClasses.Length; i++)
-            {
-                // the prediction that is supposed to be correct
-                float targetClass = predictions[i][correctClasses[i]];
-                
-                // clipping the values to between almost 0 and almost 1 to avoid infinite log result
-                if (targetClass < 1e-7f) { targetClass = 1e-7f; }
-                else if (targetClass > 1 - 1e-7f) { targetClass = 1 - 1e-7f; }
-
-                negLogProbabilities += -1 * (float)Math.Log(targetClass);
-            }
-            // getting mean probability/loss/accuracy
-            return negLogProbabilities / correctClasses.Length;
-        }
-
         public static void MinMaxNormalize(float[][] values, float lowerBound, float upperBound)
         {
             if(lowerBound >= upperBound)
@@ -96,25 +78,25 @@ namespace SoleAI
                 throw new ArgumentException("Lower Bound is greater than or equal to Upper Bound.");
             }
 
-            // x' = (u - l) * (x - min) / (max - min) + 1
-            // x' = x * ((u - l) / (max - min)) + (min * ((u - l) / (max - min)) + 1)
+            // x' = (up - low) * (x - min) / (max - min) + low
+            // x' = x * ((up - low) / (max - min)) + (min * ((up - low) / (max - min)) + 1)
             // x' = x * K + S
 
-            for (int n = 0; n < values.Length; n++)
+            for (int i = 0; i < values[0].Length; i++)
             {
-                float min = -float.PositiveInfinity;
-                float max = float.PositiveInfinity;
-                for (int w = 0; w < values[0].Length; w++)
+                float min = float.PositiveInfinity;
+                float max = -float.PositiveInfinity;
+                for (int b = 0; b < values.Length; b++)
                 {
-                    if (values[n][w] < min) { min = values[n][w]; }
-                    if (values[n][w] > max) { max = values[n][w]; }
+                    if (values[b][i] < min) { min = values[b][i]; }
+                    if (values[b][i] > max) { max = values[b][i]; }
                 }
 
                 float K = (upperBound - lowerBound) / (max - min);
-                float S = min * K + 1;
-                for (int b = 0; b < values[0].Length; b++)
+                float S = -min * K + lowerBound;
+                for (int b = 0; b < values.Length; b++)
                 {
-                    values[n][b] = K * values[n][b] + S;
+                    values[b][i] = K * values[b][i] + S;
                 }
             }
         }
