@@ -44,14 +44,8 @@ namespace SoleAI
                 // and avoiding getting out of range by substracting the a batch from the iterating range
                 for (int b = 0; b <= numOfBatches - batchSize; b += batchSize)
                 {
-                    float[][] inputs = new float[batchSize][];
-                    for(int i = 0; i < batchSize; i++)
-                    {
-                        inputs[i] = new float[inputSize];
-                    }
-
                     // getting next batch of input
-                    Copy(inputData, b, inputs, batchSize);
+                    float[][] inputs = inputData[b..(b + batchSize)];
 
                     for (int l = 0; l < Layers.Length; l++)
                     {
@@ -60,8 +54,7 @@ namespace SoleAI
                     }
 
                     // getting next batch of expected output
-                    int[] correctOutputs = new int[batchSize];
-                    Array.Copy(expectedOutputs, b, correctOutputs, 0, batchSize);
+                    int[] correctOutputs = expectedOutputs[b..(b + batchSize)];
 
                     // using the inputs array as it stores outputs from the processing (prdictions) of the last (output) layer
                     float loss = Loss(inputs, correctOutputs);
@@ -75,7 +68,7 @@ namespace SoleAI
                 TimeSpan duration = DateTime.Now - start;
                 Console.WriteLine($"Epoch finished in {duration.TotalMilliseconds} ms.\n");
             }
-            Console.WriteLine("Training finished.");
+            Console.WriteLine("Training finished.\n");
         }
 
         private float Loss(float[][] predictions, int[] correctClasses)
@@ -96,55 +89,34 @@ namespace SoleAI
             return negLogProbabilities / correctClasses.Length;
         }
 
-        private void Copy(float[][] source, int sourceIndx, float[][] dest, int len)
+        public static void MinMaxNormalize(float[][] values, float lowerBound, float upperBound)
         {
-            for (int a = sourceIndx; a < sourceIndx + len; a++)
+            if(lowerBound >= upperBound)
             {
-                dest[a - sourceIndx] = source[a];
-            }
-        }
-
-        public static void Normalize(float[][] values, float max, float min)
-        {
-            if(min >= max)
-            {
-                throw new ArgumentException("min is greater than or equal to max.");
+                throw new ArgumentException("Lower Bound is greater than or equal to Upper Bound.");
             }
 
-            // x" = 2 * (x - min) / (max - min) - 1
-            // x" = x * (2 / (max - min)) - (min * (2 / (max - min)) + 1)
-            float K = 2 / (max - min);
-            float S = min * K + 1;
+            // x' = (u - l) * (x - min) / (max - min) + 1
+            // x' = x * ((u - l) / (max - min)) + (min * ((u - l) / (max - min)) + 1)
+            // x' = x * K + S
 
-            for (int a = 0; a < values.Length; a++)
+            for (int n = 0; n < values.Length; n++)
             {
-                for(int b = 0; b < values[0].Length; b++)
+                float min = -float.PositiveInfinity;
+                float max = float.PositiveInfinity;
+                for (int w = 0; w < values[0].Length; w++)
                 {
-                    values[a][b] = K * values[a][b] - S;
+                    if (values[n][w] < min) { min = values[n][w]; }
+                    if (values[n][w] > max) { max = values[n][w]; }
+                }
+
+                float K = (upperBound - lowerBound) / (max - min);
+                float S = min * K + 1;
+                for (int b = 0; b < values[0].Length; b++)
+                {
+                    values[n][b] = K * values[n][b] + S;
                 }
             }
-        }
-
-        public static T Jagged<T>(params int[] lengths)
-        {
-            return (T)InitializeJaggedArray(typeof(T).GetElementType(), 0, lengths);
-        }
-
-        public static object InitializeJaggedArray(Type type, int index, int[] lengths)
-        {
-            Array array = Array.CreateInstance(type, lengths[index]);
-            Type elementType = type.GetElementType();
-
-            if (elementType != null)
-            {
-                for (int i = 0; i < lengths[index]; i++)
-                {
-                    array.SetValue(
-                        InitializeJaggedArray(elementType, index + 1, lengths), i);
-                }
-            }
-
-            return array;
         }
     }
 }

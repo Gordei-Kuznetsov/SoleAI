@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SoleAI
 {
@@ -18,19 +16,7 @@ namespace SoleAI
                 new float[] { 0.91f, -1.98f, 2.9f, -1.43f }
             };
 
-            float min = 10f;
-            float max = -10f;
-
-            for (int n = 0; n < inputs.Length; n++)
-            {
-                for (int w = 0; w < inputs[0].Length; w++)
-                {
-                    if (inputs[n][w] < min) { min = inputs[n][w]; }
-                    if (inputs[n][w] > max) { max = inputs[n][w]; }
-                }
-            }
-
-            Network.Normalize(inputs, max, min);
+            Network.MinMaxNormalize(inputs, -1, 1);
 
             int[] expectedPredictedClasses = new int[] { 1, 0, 0, 2, 1, 2 };
 

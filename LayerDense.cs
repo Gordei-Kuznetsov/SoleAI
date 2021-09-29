@@ -36,27 +36,30 @@ namespace SoleAI
 
         public float[][] Forward(float[][] inputBatch, int batchSize)
         {
-            outputs = new float[batchSize][];
-
             Process(inputBatch, batchSize);
 
-            activation.Forward(outputs);
+            activation.Act(ref outputs);
 
             return outputs;
         }
 
         private void Process(float[][] inputBatch, int batchSize)
         {
+            outputs = new float[batchSize][];
+
             for (int b = 0; b < batchSize; b++)
             {
                 outputs[b] = new float[shape.Item1];
+
                 for (int n = 0; n < shape.Item1; n++)
                 {
                     float dot = 0;
+
                     for (int w = 0; w < shape.Item2; w++)
                     {
                         dot += weights[n][w] * inputBatch[b][w];
                     }
+
                     outputs[b][n] = dot + biases[n];
                 }
             }
