@@ -1,7 +1,10 @@
 ﻿GENERAL
 
 1. Use appropriate weights initialization methods depending on the activation function for the layer
+(https://medium.com/techspace-usict/normalization-techniques-in-deep-neural-networks-9121bf100d8)
 2. Add methods of formating input data
+3. Add method to save the model in a file (probably json)
+4. Do something with current interfaces: apply types to methods to make sure that only specific activations, norm., and losses are used.
 
 OPTIMIZATION
 
@@ -9,3 +12,4 @@ OPTIMIZATION
 
 TESTING
 
+1. 

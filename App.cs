@@ -1,4 +1,7 @@
 ﻿using System;
+using SoleAI.Activations;
+using SoleAI.Losses;
+using SoleAI.Normalizations;
 
 namespace SoleAI
 {
@@ -16,7 +19,7 @@ namespace SoleAI
                 new float[] { 0.91f, -1.98f, 2.9f, -1.43f }
             };
 
-            Network.MinMaxNormalize(inputs, -1, 1);
+            new MinMaxNormalization().Norm(inputs, -1, 1);
 
             float[][] expectedPredictedClasses = new float[][]
             {
