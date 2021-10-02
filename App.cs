@@ -9,27 +9,11 @@ namespace SoleAI
     {
         public static void Run()
         {
-            float[][] inputs = new float[][]
-            {
-                new float[] { 1.0f, 2.0f, 3.0f, 2.5f },
-                new float[] { 2.0f, 5.0f, -1.0f, 2.0f },
-                new float[] { -1.5f, 2.7f, 3.3f, -0.8f },
-                new float[] { 3.2f, -1.0f, 0.1f, -2.2f },
-                new float[] { -1.5f, -0.9f, 0.1f, 3.2f },
-                new float[] { 0.91f, -1.98f, 2.9f, -1.43f }
-            };
+            float[][] inputs = Network.LoadCsv(@"InputData.csv");
 
             new MinMaxNormalization().Norm(inputs, -1, 1);
 
-            float[][] expectedPredictedClasses = new float[][]
-            {
-                new float[] { 1 },
-                new float[] { 0 },
-                new float[] { 0 },
-                new float[] { 1 },
-                new float[] { 1 },
-                new float[] { 0 }
-            };
+            float[][] expectedOutput = Network.LoadCsv(@"OutputData.csv");
 
             Network network = new Network(inputs[0].Length, new LayerDenseStruct[] {
                 new LayerDenseStruct(6, new Tanh()),
@@ -37,7 +21,7 @@ namespace SoleAI
                 new LayerDenseStruct(1, new Sigmoid())
             });
 
-            network.Train(inputs, expectedPredictedClasses, new MSELoss(), 2, 3);
+            network.Train(inputs, expectedOutput, new MSELoss(), 32, 3);
 
             Console.ReadLine();
         }
