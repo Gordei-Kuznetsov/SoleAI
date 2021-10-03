@@ -19,5 +19,10 @@ namespace SoleAI.Activations
         {
             return ValueRange.Sigmoid;
         }
+
+        public Type GetClassName()
+        {
+            return GetType();
+        }
     }
 }
