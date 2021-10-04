@@ -7,39 +7,69 @@ namespace SoleAI
     {
         public LayerDense((int, int) shape, IActivation activation)
         {
-            this.shape = shape;
-            this.activation = activation;
+            _shape = shape;
+            _activation = activation;
 
             Random rand = new Random();
 
-            weights = new float[shape.Item1][];
+            _weights = new float[shape.Item1][];
 
             for (int n = 0; n < shape.Item1; n++)
             {
-                weights[n] = new float[shape.Item2];
+                _weights[n] = new float[shape.Item2];
                 for (int w = 0; w < shape.Item2; w++)
                 {
                     int sign = rand.NextDouble() > 0.5 ? 1 : -1;
                     float weight = (float)rand.NextDouble() * sign;
-                    weights[n][w] = weight;
+                    _weights[n][w] = weight;
                 }
             }
 
-            biases = new float[shape.Item1];
-            Array.Fill(biases, 0f);
+            _biases = new float[shape.Item1];
+            Array.Fill(_biases, 0f);
         }
 
-        public readonly (int, int) shape;
-        private readonly float[][] weights;
-        private readonly float[] biases;
+        public LayerDense((int, int) shape, float[][] weights, float[] biases, IActivation activation)
+        {
+            _shape = shape;
+            _weights = weights;
+            _biases = biases;
+            _activation = activation;
+        }
+
+        public LayerDense() { }
+
+        private readonly (int, int) _shape;
+        public (int, int) shape
+        {
+            get { return _shape; }
+        }
+
+        private readonly float[][] _weights;
+        public float[][] weights
+        {
+            get { return _weights;  }
+        }
+
+        private readonly float[] _biases;
+        public float[] biases
+        {
+            get { return _biases; }
+        }
+
         private float[][] outputs;
-        private readonly IActivation activation;
+
+        private readonly IActivation _activation;
+        public IActivation activation
+        {
+            get { return _activation; }
+        }
 
         public float[][] Forward(float[][] inputBatch, int batchSize)
         {
             Process(inputBatch, batchSize);
 
-            activation.Act(ref outputs);
+            _activation.Act(ref outputs);
 
             return outputs;
         }
@@ -50,18 +80,18 @@ namespace SoleAI
 
             for (int b = 0; b < batchSize; b++)
             {
-                outputs[b] = new float[shape.Item1];
+                outputs[b] = new float[_shape.Item1];
 
-                for (int n = 0; n < shape.Item1; n++)
+                for (int n = 0; n < _shape.Item1; n++)
                 {
                     float dot = 0;
 
-                    for (int w = 0; w < shape.Item2; w++)
+                    for (int w = 0; w < _shape.Item2; w++)
                     {
-                        dot += weights[n][w] * inputBatch[b][w];
+                        dot += _weights[n][w] * inputBatch[b][w];
                     }
 
-                    outputs[b][n] = dot + biases[n];
+                    outputs[b][n] = dot + _biases[n];
                 }
             }
         }

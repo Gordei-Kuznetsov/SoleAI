@@ -1,4 +1,6 @@
-﻿namespace SoleAI.Activations
+﻿using System;
+
+namespace SoleAI.Activations
 {
     public class LeakyReLU : IActivation
     {
@@ -29,6 +31,11 @@
         public ValueRange GetValueRange()
         {
             return ValueRange.All;
+        }
+
+        public Type GetClassName()
+        {
+            return GetType();
         }
     }
 }

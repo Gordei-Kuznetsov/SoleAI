@@ -1,4 +1,6 @@
-﻿namespace SoleAI.Activations
+﻿using System;
+
+namespace SoleAI.Activations
 {
     public class ReLU : IActivation
     {
@@ -19,6 +21,11 @@
         public ValueRange GetValueRange()
         {
             return ValueRange.ZeroToInf;
+        }
+
+        public Type GetClassName()
+        {
+            return GetType();
         }
     }
 }
