@@ -23,6 +23,14 @@ namespace SoleAI
 
             network.Train(inputs, expectedOutput, new MSELoss(), 32, 3);
 
+            network.SaveToJson("network.json");
+
+            Network newNetwork = Network.LoadFromJson("network.json");
+
+            Console.WriteLine("\nNew Network Training\n");
+
+            newNetwork.Train(inputs[..64], expectedOutput[..64], new MSELoss(), 32, 3);
+
             Console.ReadLine();
         }
     }

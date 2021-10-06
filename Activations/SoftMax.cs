@@ -40,5 +40,10 @@ namespace SoleAI.Activations
         {
             return ValueRange.ZeroToOne;
         }
+
+        public Type GetClassName()
+        {
+            return GetType();
+        }
     }
 }

@@ -19,5 +19,10 @@ namespace SoleAI.Activations
         {
             return ValueRange.NegativeOneToOne;
         }
+
+        public Type GetClassName()
+        {
+            return GetType();
+        }
     }
 }

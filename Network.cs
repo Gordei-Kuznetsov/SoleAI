@@ -1,6 +1,8 @@
-﻿using SoleAI.Losses;
+﻿using SoleAI.Activations;
+using SoleAI.Losses;
 using System;
 using System.IO;
+using System.Text.Json;
 
 namespace SoleAI
 {
@@ -8,18 +10,30 @@ namespace SoleAI
     {
         public Network(int numOfInputs, LayerDenseStruct[] layersToAdd)
         {
-            Layers = new LayerDense[layersToAdd.Length];
+            _layers = new LayerDense[layersToAdd.Length];
             
             // initializing the first Layer outside the loop as it is does not have a preceding layer to get the inputSize value from
-            Layers[0] = new LayerDense((layersToAdd[0].size, numOfInputs), layersToAdd[0].activation);
+            _layers[0] = new LayerDense((layersToAdd[0].size, numOfInputs), layersToAdd[0].activation);
 
             for (int i = 1; i < layersToAdd.Length; i++)
             {
-                Layers[i] = new LayerDense((layersToAdd[i].size, layersToAdd[i - 1].size), layersToAdd[i].activation);
+                _layers[i] = new LayerDense((layersToAdd[i].size, layersToAdd[i - 1].size), layersToAdd[i].activation);
             }
         }
 
-        private readonly LayerDense[] Layers;
+        public Network(LayerDense[] layers)
+        {
+            _layers = layers;
+        }
+
+        public Network() { }
+
+        private readonly LayerDense[] _layers;
+
+        public LayerDense[] Layers
+        {
+            get { return _layers; }
+        }
 
         public void Train(float[][] inputData, float[][] expectedOutputs, ILoss lossFunc, int batchSize, int epochs)
         {
@@ -30,7 +44,7 @@ namespace SoleAI
             }
 
             int inputSize = inputData[0].Length;
-            if (Layers[0].shape.Item2 != inputSize)
+            if (_layers[0].shape.Item2 != inputSize)
             {
                 throw new ArgumentException("Number of input values int the inputs does not match the number of weights in the first layer.");
             }
@@ -49,10 +63,10 @@ namespace SoleAI
                     // getting next batch of input
                     float[][] inputs = inputData[b..(b + batchSize)];
 
-                    for (int l = 0; l < Layers.Length; l++)
+                    for (int l = 0; l < _layers.Length; l++)
                     {
                         // outputs of the processing become the inputs for next batch
-                        inputs = Layers[l].Forward(inputs, batchSize);
+                        inputs = _layers[l].Forward(inputs, batchSize);
                     }
 
                     // getting next batch of expected output
@@ -94,6 +108,64 @@ namespace SoleAI
 
             return values;
         }
+
+        public void SaveToJson(string filename)
+        {
+            NetworkStruct networkStruct = new NetworkStruct() {
+                shapes = new string[Layers.Length][],
+                weights = new float[Layers.Length][][],
+                biases = new float[Layers.Length][],
+                activations = new string[Layers.Length]
+            };
+            for(int i = 0; i < Layers.Length; i++)
+            {
+                networkStruct.shapes[i] = new string[] { Layers[i].shape.Item1.ToString(), Layers[i].shape.Item2.ToString() };
+                networkStruct.weights[i] = Layers[i].weights;
+                networkStruct.biases[i] = Layers[i].biases;
+                networkStruct.activations[i] = Layers[i].activation.GetClassName().ToString();
+            }
+            string json = JsonSerializer.Serialize(networkStruct, new JsonSerializerOptions { WriteIndented = true });
+
+            string projectDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
+
+            File.WriteAllText(Path.Combine(projectDirectory, filename), json);
+        }
+
+        public static Network LoadFromJson(string filename)
+        {
+            string projectDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
+
+            string wholeFile = File.ReadAllText(Path.Combine(projectDirectory, filename));
+
+            NetworkStruct networkStruct = JsonSerializer.Deserialize<NetworkStruct>(wholeFile);
+
+            LayerDense[] layers = new LayerDense[networkStruct.shapes.Length];
+
+
+            for (int i = 0; i < layers.Length; i++)
+            {
+                LayerDense layer = new LayerDense(
+                    shape: (int.Parse(networkStruct.shapes[i][0]), int.Parse(networkStruct.shapes[i][1])),
+                    weights: networkStruct.weights[i],
+                    biases: networkStruct.biases[i],
+                    activation: (IActivation)Activator.CreateInstance(Type.GetType(networkStruct.activations[i]))
+                );
+                layers[i] = layer;
+            }
+
+            Network network = new Network(layers);
+
+            return network;
+        }
+    }
+
+    public struct NetworkStruct
+    {
+        public string[][] shapes { get; set; }
+        public float[][][] weights { get; set; }
+        public float[][] biases { get; set; }
+        public string[] activations { get; set; }
+
     }
 
     public enum ValueRange
