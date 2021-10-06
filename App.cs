@@ -1,7 +1,7 @@
 ﻿using System;
 using SoleAI.Activations;
 using SoleAI.Losses;
-using SoleAI.Normalizations;
+using SoleAI.Scalings;
 
 namespace SoleAI
 {
@@ -11,7 +11,7 @@ namespace SoleAI
         {
             float[][] inputs = Network.LoadCsv(@"InputData.csv");
 
-            new MinMaxNormalization().Norm(inputs, -1, 1);
+            MinMaxNormalize inputScaler = new MinMaxNormalize(inputs, -1, 1);
 
             float[][] expectedOutput = Network.LoadCsv(@"OutputData.csv");
 
