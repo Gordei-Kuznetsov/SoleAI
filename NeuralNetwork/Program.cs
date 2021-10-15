@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using BenchmarkDotNet.Running;
 
-namespace SoleAI
+namespace NeuralNetwork
 {
     class Program
     {

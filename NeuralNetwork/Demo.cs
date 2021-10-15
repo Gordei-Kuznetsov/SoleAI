@@ -4,7 +4,7 @@ using System;
 using System.Threading.Tasks;
 using System.Linq;
 
-namespace SoleAI
+namespace NeuralNetwork
 {
     //[SimpleJob(RuntimeMoniker.Net472, baseline: true)]
     //[SimpleJob(RuntimeMoniker.Net50)]

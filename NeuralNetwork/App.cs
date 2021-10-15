@@ -5,7 +5,7 @@ using NNLibrary.Losses;
 using NNLibrary.Scalings;
 using NNLibrary;
 
-namespace SoleAI
+namespace NeuralNetwork
 {
     public class App
     {
