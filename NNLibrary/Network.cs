@@ -22,12 +22,19 @@ namespace NNLibrary
             }
         }
 
-        public Network(LayerDense[] layers)
+        private Network(LayerDense[] layers)
         {
+            for(int i = 1; i < layers.Length; i++)
+            {
+                if(layers[i].Shape.Item2 != layers[i - 1].Shape.Item1)
+                {
+                    throw new Exception("Shape of the neighbouring layers do not match up");
+                }
+            }
             Layers = layers;
         }
 
-        public LayerDense[] Layers { get; }
+        private LayerDense[] Layers { get; }
 
         public void Train(float[][] inputData, float[][] expectedOutputs, ILoss lossFunc, int batchSize, int epochs)
         {
@@ -82,7 +89,7 @@ namespace NNLibrary
             Console.WriteLine("Training finished.\n");
         }
 
-        public static float[][] LoadCsv(string filename)
+        public static float[][] LoadDataFromCSV(string filename)
         {
             string projectDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
 
@@ -104,7 +111,7 @@ namespace NNLibrary
             return values;
         }
 
-        public void SaveToJson(string filename)
+        public void SaveToJSON(string filename)
         {
             NetworkStruct networkStruct = new NetworkStruct() {
                 Shapes = new string[Layers.Length][],
@@ -117,7 +124,7 @@ namespace NNLibrary
                 networkStruct.Shapes[i] = new string[] { Layers[i].Shape.Item1.ToString(), Layers[i].Shape.Item2.ToString() };
                 networkStruct.Weights[i] = Layers[i].Weights;
                 networkStruct.Biases[i] = Layers[i].Biases;
-                networkStruct.Activations[i] = Layers[i].Activation.GetClassName().ToString();
+                networkStruct.Activations[i] = Layers[i].Activation.GetType().ToString();
             }
             string json = JsonSerializer.Serialize(networkStruct, new JsonSerializerOptions { WriteIndented = true });
 
@@ -126,7 +133,7 @@ namespace NNLibrary
             File.WriteAllText(Path.Combine(projectDirectory, filename), json);
         }
 
-        public static Network LoadFromJson(string filename)
+        public static Network LoadFromJSON(string filename)
         {
             string projectDirectory = Directory.GetParent(Environment.CurrentDirectory).Parent.Parent.FullName;
 
@@ -143,7 +150,7 @@ namespace NNLibrary
                     shape: (int.Parse(networkStruct.Shapes[i][0]), int.Parse(networkStruct.Shapes[i][1])),
                     weights: networkStruct.Weights[i],
                     biases: networkStruct.Biases[i],
-                    activation: (IActivation)Activator.CreateInstance(Type.GetType(networkStruct.Activations[i]))
+                    activation: (Activation)Activator.CreateInstance(Type.GetType(networkStruct.Activations[i]))
                 );
                 layers[i] = layer;
             }

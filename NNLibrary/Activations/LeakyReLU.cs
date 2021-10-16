@@ -2,7 +2,7 @@
 
 namespace NNLibrary.Activations
 {
-    public class LeakyReLU : IActivation
+    public class LeakyReLU : Activation
     {
         public LeakyReLU()
         {
@@ -14,7 +14,7 @@ namespace NNLibrary.Activations
         }
 
         private readonly float factor;
-        public void Act(ref float[][] output)
+        public override void Act(ref float[][] output)
         {
             for (int b = 0; b < output.Length; b++)
             {
@@ -28,14 +28,6 @@ namespace NNLibrary.Activations
             }
         }
 
-        public ValueRange GetValueRange()
-        {
-            return ValueRange.All;
-        }
-
-        public Type GetClassName()
-        {
-            return GetType();
-        }
+        public override ValueRange ValueRange { get { return ValueRange.All; } }
     }
 }

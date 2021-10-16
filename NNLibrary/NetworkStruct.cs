@@ -1,6 +1,6 @@
 ﻿namespace NNLibrary
 {
-    public struct NetworkStruct
+    internal struct NetworkStruct
     {
         public string[][] Shapes { get; set; }
         public float[][][] Weights { get; set; }

@@ -11,11 +11,11 @@ namespace NeuralNetwork
     {
         public static void Run()
         {
-            float[][] inputs = Network.LoadCsv(@"InputData.csv");
+            float[][] inputs = Network.LoadDataFromCSV(@"InputData.csv");
 
             MinMaxNormalize inputScaler = new MinMaxNormalize(inputs, -1, 1);
 
-            float[][] expectedOutput = Network.LoadCsv(@"OutputData.csv");
+            float[][] expectedOutput = Network.LoadDataFromCSV(@"OutputData.csv");
 
             Network network = new Network(inputs[0].Length, new LayerDenseStruct[] {
                 new LayerDenseStruct(6, new Tanh()),
@@ -25,9 +25,9 @@ namespace NeuralNetwork
 
             network.Train(inputs, expectedOutput, new MSELoss(), 32, 3);
             
-            network.SaveToJson("network.json");
+            network.SaveToJSON("network.json");
 
-            Network newNetwork = Network.LoadFromJson("network.json");
+            Network newNetwork = Network.LoadFromJSON("network.json");
 
             Console.WriteLine("\nNew Network Training\n");
 

@@ -3,9 +3,9 @@ using System;
 
 namespace NNLibrary
 {
-    public class LayerDense
+    internal class LayerDense
     {
-        public LayerDense((int, int) shape, IActivation activation)
+        public LayerDense((int, int) shape, Activation activation)
         {
             Shape = shape;
             Activation = activation;
@@ -29,7 +29,7 @@ namespace NNLibrary
             Array.Fill(Biases, 0f);
         }
 
-        public LayerDense((int, int) shape, float[][] weights, float[] biases, IActivation activation)
+        public LayerDense((int, int) shape, float[][] weights, float[] biases, Activation activation)
         {
             if (weights.Length != shape.Item1 ||
                 weights[0].Length != shape.Item2 ||
@@ -50,7 +50,7 @@ namespace NNLibrary
 
         private float[][] outputs;
 
-        public IActivation Activation { get; }
+        public Activation Activation { get; }
 
         public float[][] Forward(float[][] inputBatch, int batchSize)
         {

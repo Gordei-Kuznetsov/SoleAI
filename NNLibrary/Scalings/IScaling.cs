@@ -2,7 +2,7 @@
 
 namespace NNLibrary.Scalings
 {
-    interface IScaling
+    public interface IScaling
     {
         void Denormalize(float[][] values);
     }
