@@ -26,10 +26,5 @@ namespace NNLibrary.Losses
             // getting mean probability/loss/accuracy
             return sum / predictions.Length;
         }
-
-        public ValueRange GetValueRange()
-        {
-            return ValueRange.ZeroToOne;
-        }
     }
 }

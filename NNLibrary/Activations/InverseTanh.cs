@@ -2,9 +2,9 @@
 
 namespace NNLibrary.Activations
 {
-    public class InverseTanh : Activation
+    public class InverseTanh : IActivation
     {
-        public override void Act(ref float[][] output)
+        public void Process(ref float[][] output)
         {
             for (int b = 0; b < output.Length; b++)
             {
@@ -14,7 +14,5 @@ namespace NNLibrary.Activations
                 }
             }
         }
-
-        public override ValueRange ValueRange { get { return ValueRange.NegativeOneToOne; } }
     }
 }

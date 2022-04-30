@@ -2,10 +2,8 @@
 
 namespace NNLibrary.Activations
 {
-    public class Linear : Activation
+    public class Linear : IActivation
     {
-        public override void Act(ref float[][] output) { }
-
-        public override ValueRange ValueRange { get { return ValueRange.All; } }
+        public void Process(ref float[][] output) { }
     }
 }

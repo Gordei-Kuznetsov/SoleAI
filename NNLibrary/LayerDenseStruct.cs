@@ -5,12 +5,12 @@ namespace NNLibrary
 {
     public struct LayerDenseStruct
     {
-        public LayerDenseStruct(int size, Activation activation)
+        public LayerDenseStruct(int size, IActivation activation)
         {
             Size = size;
             Activation = activation;
         }
         public int Size { get; set; }
-        public Activation Activation { get; set; }
+        public IActivation Activation { get; set; }
     }
 }

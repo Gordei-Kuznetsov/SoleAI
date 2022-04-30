@@ -7,10 +7,5 @@
         {
             return 0;
         }
-
-        public ValueRange GetValueRange()
-        {
-            return ValueRange.ZeroToOne;
-        }
     }
 }

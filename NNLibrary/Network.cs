@@ -37,6 +37,7 @@ namespace NNLibrary
             Validate.TrainingData(inputData, expectedOutputs, Layers[0].Shape.weights, Layers[Layers.Length - 1].Shape.nodes);
 
             Console.WriteLine($"Training started.\nBatch size: { batchSize }; Epochs: { epochs }.\n");
+            long totalTIme = 0;
 
             int numOfBatches = inputData.Length;
             for (int e = 0; e < epochs; e++)
@@ -68,8 +69,9 @@ namespace NNLibrary
 
                 timer.Stop();
                 Console.WriteLine($"Epoch finished in { timer.ElapsedMilliseconds } ms.\n");
+                totalTIme += timer.ElapsedMilliseconds;
             }
-            Console.WriteLine("Training finished.\n");
+            Console.WriteLine($"Training finished in { totalTIme } ms.\n");
         }
 
         public static float[][] LoadDataFromCSV(string filename)
@@ -124,7 +126,7 @@ namespace NNLibrary
                         shape: (int.Parse(networkStruct.Shapes[i][0]), int.Parse(networkStruct.Shapes[i][1])),
                         weights: networkStruct.Weights[i],
                         biases: networkStruct.Biases[i],
-                        activation: (Activation)Activator.CreateInstance(Type.GetType(networkStruct.Activations[i]))
+                        activation: (IActivation)Activator.CreateInstance(Type.GetType(networkStruct.Activations[i]))
                     );
                     layers[i] = layer;
                 }

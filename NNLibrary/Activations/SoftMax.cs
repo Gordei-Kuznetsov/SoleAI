@@ -2,9 +2,9 @@
 
 namespace NNLibrary.Activations
 {
-    public class SoftMax : Activation
+    public class SoftMax : IActivation
     {
-        public override void Act(ref float[][] outputs)
+        public void Process(ref float[][] outputs)
         {
             for (int b = 0; b < outputs.Length; b++)
             {
@@ -35,7 +35,5 @@ namespace NNLibrary.Activations
                 }
             }
         }
-
-        public override ValueRange ValueRange { get { return ValueRange.ZeroToOne; } }
     }
 }

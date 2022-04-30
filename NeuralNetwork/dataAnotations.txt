@@ -1,21 +1,21 @@
 Species, Gender, Height, Location, Weight
 	
-Species	
-GS	1
-NIBr	2
-Tok	3
+Species		Assigned
+GS			1
+NIBr		2
+Tok			3
 
-Gender
-F       0
-M       1
+Gender		Assigned
+F			0
+M			1
 
-locations	
-CW	1
-E	2
-EC	3
-N	4
-NF	5
-NWN	6
-SF	7
-Stl	8
-W	9
+locations	Assigned
+CW			1
+E			2
+EC			3
+N			4
+NF			5
+NWN			6
+SF			7
+Stl			8
+W			9

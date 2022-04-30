@@ -15,10 +15,5 @@
 
             return sum / predictions.Length;
         }
-
-        public ValueRange GetValueRange()
-        {
-            return ValueRange.ZeroToOne;
-        }
     }
 }

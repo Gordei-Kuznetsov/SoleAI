@@ -5,7 +5,7 @@ namespace NNLibrary
 {
     internal class LayerDense
     {
-        public LayerDense((int nodes, int weights) shape, Activation activation)
+        public LayerDense((int nodes, int weights) shape, IActivation activation)
         {
             Shape = Validate.LayerDenseShape(shape);
             Activation = activation;
@@ -28,7 +28,7 @@ namespace NNLibrary
             Array.Fill(Biases, 0f);
         }
 
-        public LayerDense((int nodes, int weights) shape, float[][] weights, float[] biases, Activation activation)
+        public LayerDense((int nodes, int weights) shape, float[][] weights, float[] biases, IActivation activation)
         {
             Shape = Validate.LayerDenseShape(shape);
             Weights = Validate.Weights(weights ,shape);
@@ -42,13 +42,13 @@ namespace NNLibrary
 
         private float[][] Outputs;
 
-        public Activation Activation { get; }
+        public IActivation Activation { get; }
 
         public float[][] Forward(float[][] inputBatch, int batchSize)
         {
             Process(inputBatch, batchSize);
 
-            Activation.Act(ref Outputs);
+            Activation.Process(ref Outputs);
 
             return Outputs;
         }
