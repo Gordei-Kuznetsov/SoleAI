@@ -7,10 +7,10 @@ namespace NNLibrary
     {
         public LayerDenseStruct(int size, Activation activation)
         {
-            this.size = size;
-            this.activation = activation;
+            Size = size;
+            Activation = activation;
         }
-        public int size;
-        public Activation activation;
+        public int Size { get; set; }
+        public Activation Activation { get; set; }
     }
 }

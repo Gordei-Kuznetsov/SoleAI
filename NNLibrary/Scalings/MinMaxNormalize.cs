@@ -11,8 +11,8 @@ namespace NNLibrary.Scalings
                 throw new ArgumentException("Lower Bound is greater than or equal to Upper Bound.");
             }
 
-            this.lowerBound = lowerBound;
-            this.upperBound = upperBound;
+            LowerBound = lowerBound;
+            UpperBound = upperBound;
             mins = new float[values[0].Length];
             maxs = new float[values[0].Length];
 
@@ -34,8 +34,8 @@ namespace NNLibrary.Scalings
                 mins[i] = min;
                 maxs[i] = max;
 
-                float K = (upperBound - lowerBound) / (max - min);
-                float S = -min * K + lowerBound;
+                float K = (UpperBound - LowerBound) / (max - min);
+                float S = -min * K + LowerBound;
                 for (int b = 0; b < values.Length; b++)
                 {
                     values[b][i] = K * values[b][i] + S;
@@ -43,8 +43,8 @@ namespace NNLibrary.Scalings
             }
         }
 
-        private readonly float lowerBound;
-        private readonly float upperBound;
+        private readonly float LowerBound;
+        private readonly float UpperBound;
         private readonly float[] mins;
         private readonly float[] maxs;
 

@@ -5,19 +5,18 @@ namespace NNLibrary
 {
     internal class LayerDense
     {
-        public LayerDense((int, int) shape, Activation activation)
+        public LayerDense((int nodes, int weights) shape, Activation activation)
         {
-            Shape = shape;
+            Shape = Validate.LayerDenseShape(shape);
             Activation = activation;
 
             Random rand = new Random();
+            Weights = new float[Shape.nodes][];
 
-            Weights = new float[shape.Item1][];
-
-            for (int n = 0; n < shape.Item1; n++)
+            for (int n = 0; n < Shape.nodes; n++)
             {
-                Weights[n] = new float[shape.Item2];
-                for (int w = 0; w < shape.Item2; w++)
+                Weights[n] = new float[Shape.weights];
+                for (int w = 0; w < Shape.weights; w++)
                 {
                     int sign = rand.NextDouble() > 0.5 ? 1 : -1;
                     float weight = (float)rand.NextDouble() * sign;
@@ -25,30 +24,23 @@ namespace NNLibrary
                 }
             }
 
-            Biases = new float[shape.Item1];
+            Biases = new float[Shape.nodes];
             Array.Fill(Biases, 0f);
         }
 
-        public LayerDense((int, int) shape, float[][] weights, float[] biases, Activation activation)
+        public LayerDense((int nodes, int weights) shape, float[][] weights, float[] biases, Activation activation)
         {
-            if (weights.Length != shape.Item1 ||
-                weights[0].Length != shape.Item2 ||
-                biases.Length != shape.Item1)
-            {
-                throw new ArgumentException("The layer's shape is inconsistent with the shapes of other parameters");
-            }
-
-            Shape = shape;
-            Weights = weights;
-            Biases = biases;
+            Shape = Validate.LayerDenseShape(shape);
+            Weights = Validate.Weights(weights ,shape);
+            Biases = Validate.Biases(biases, shape);
             Activation = activation;
         }
 
-        public (int, int) Shape { get; }
+        public (int nodes, int weights) Shape { get; }
         public float[][] Weights { get; }
         public float[] Biases { get; }
 
-        private float[][] outputs;
+        private float[][] Outputs;
 
         public Activation Activation { get; }
 
@@ -56,29 +48,29 @@ namespace NNLibrary
         {
             Process(inputBatch, batchSize);
 
-            Activation.Act(ref outputs);
+            Activation.Act(ref Outputs);
 
-            return outputs;
+            return Outputs;
         }
 
         private void Process(float[][] inputBatch, int batchSize)
         {
-            outputs = new float[batchSize][];
+            Outputs = new float[batchSize][];
 
             for (int b = 0; b < batchSize; b++)
             {
-                outputs[b] = new float[Shape.Item1];
+                Outputs[b] = new float[Shape.nodes];
 
-                for (int n = 0; n < Shape.Item1; n++)
+                for (int n = 0; n < Shape.nodes; n++)
                 {
                     float dot = 0;
 
-                    for (int w = 0; w < Shape.Item2; w++)
+                    for (int w = 0; w < Shape.weights; w++)
                     {
                         dot += Weights[n][w] * inputBatch[b][w];
                     }
 
-                    outputs[b][n] = dot + Biases[n];
+                    Outputs[b][n] = dot + Biases[n];
                 }
             }
         }

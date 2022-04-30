@@ -6,8 +6,8 @@ namespace NNLibrary.Scalings
     {
         public Standardize(float[][] values)
         {
-            means = new float[values[0].Length];
-            divs = new float[values[0].Length];
+            Means = new float[values[0].Length];
+            Divs = new float[values[0].Length];
 
             for (int i = 0; i < values[0].Length; i++)
             {
@@ -28,8 +28,8 @@ namespace NNLibrary.Scalings
                 float div = (float)Math.Sqrt(difSum / values.Length);
 
                 // saving the values for later to scale the data back up
-                means[i] = mean;
-                divs[i] = div;
+                Means[i] = mean;
+                Divs[i] = div;
 
                 for (int b = 0; b < values.Length; b++)
                 {
@@ -38,8 +38,8 @@ namespace NNLibrary.Scalings
             }
         }
 
-        private readonly float[] means;
-        private readonly float[] divs;
+        private readonly float[] Means;
+        private readonly float[] Divs;
 
         public void Denormalize(float[][] values)
         {
